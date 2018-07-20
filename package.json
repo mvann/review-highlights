@@ -1,0 +1,23 @@
+{
+  "name": "review-highlights",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mvann/review-highlights.git"
+  },
+  "author": "Michael Vann",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mvann/review-highlights/issues"
+  },
+  "homepage": "https://github.com/mvann/review-highlights#readme",
+  "dependencies": {
+    "csv-parse": "^2.5.0",
+    "sentiment": "^5.0.1"
+  }
+}
