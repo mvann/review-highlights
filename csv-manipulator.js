@@ -1,52 +1,86 @@
-
-
 var parse = require('csv-parse');
 var fs = require('fs');
-var words = {};
+var readline = require('readline');
 
-var output = [];
+var bigrams = {};
+var reviews = [];
 var parser = parse({});
+var numCorpusBigrams = 0;
+var collocations = [];
+var possibleHighlights = [];
+
+const splitReviewIntoCleanSentences = function(review){
+  return review.toLowerCase().replace(/[!\':\,\$\(\)\?\;\&\"]/g, '').split('.');
+}
+
+const indexCorpusBigrams = function(sentence, bigrams) {
+  let numBigrams = 0;
+
+  sentence = sentence.split(/\s+/);
+  for (let j = 0; j < sentence.length - 1; j++)
+  {
+    if (!bigrams[sentence[j]])
+      bigrams[sentence[j]] = {};
+    if (!bigrams[sentence[j]][sentence[j + 1]])
+      bigrams[sentence[j]][sentence[j+1]] = 1;
+    else
+      bigrams[sentence[j]][sentence[j+1]]++;
+    numBigrams++;
+  }
+  return numBigrams;
+}
+
 parser.on('readable', function(){
   while(r = parser.read()){
-    arr = r[5].toLowerCase().replace(/[!\':\,\$\(\)\?\;\&\"]/g, '').split('.')
-    // arr = arr.map(x => x.split(/\s+/))
-    output.push(arr);
-
+    reviews.push(splitReviewIntoCleanSentences(r[5]));
   }
 });
 
 parser.on('finish', () => {
-  output.shift();
-  for (let review of output)
-  {
-    for (let i = 0; i < review.length; i++)
-    {
-      sentence = review[i];
-      sentence = sentence.split(/\s+/);
-      // console.log(sentence);
-      for (let j = 0; j < sentence.length - 1; j++)
-      {
-        if (!words[sentence[j]])
-          words[sentence[j]] = {};
-        if (!words[sentence[j]][sentence[j + 1]])
-          words[sentence[j]][sentence[j+1]] = 1;
-        else
-          words[sentence[j]][sentence[j+1]]++;
-      }
+  reviews.shift();
+  for (let review of reviews) {
+    for (let sentence of review) {
+      numCorpusBigrams += indexCorpusBigrams(sentence, bigrams);
     }
   }
-  console.log(words);
-
-  var lineReader = require('readline').createInterface({
-    input: fs.createReadStream('reviews/test.csv')
-  });
-
-  lineReader.on('line', function (line) {
-    console.log(line);
-  });
-
 });
 
+exports.printReviewHighlights = function(path, num) {
+  let lineReader = readline.createInterface({
+    input: fs.createReadStream(path)
+  });
+
+  lineReader.on('line', (line) => {
+    let thisReview = line.split('.');
+    let cleanSentences = splitReviewIntoCleanSentences(review);
+    for (let i = 0; i < thisReview.length; i++) {
+      possibleHighlights.push({
+        original: thisReview[i] + '.',
+        clean: cleanSentences[i]
+      });
+    }
+  });
+
+  lineReader.on('close', () => {
+    console.log('closed...');
+    // fs.createReadStream('reviews/ten-thousand.csv').pipe(parser);
+  });
+};
 
 
-fs.createReadStream('reviews/ten-thousand.csv').pipe(parser);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
